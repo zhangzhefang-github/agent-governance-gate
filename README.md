@@ -297,20 +297,20 @@ This project is intended for engineers and architects who:
 
 **This project IS:**
 
-✅ Governance gate (ALLOW/RESTRICT/ESCALATE/STOP decisions)
-✅ Deterministic, auditable decision logic
-✅ Policy-driven rule evaluation (YAML)
-✅ Framework-agnostic integration layer
-✅ Reference implementation for production systems
+- Governance gate (ALLOW/RESTRICT/ESCALATE/STOP decisions)
+- Deterministic, auditable decision logic
+- Policy-driven rule evaluation (YAML)
+- Framework-agnostic integration layer
+- Reference implementation for production systems
 
 **This project is NOT:**
 
-❌ Workflow engine (use LangGraph, Temporal, etc.)
-❌ Rule engine (we use simple YAML policies, not Drools/OPA)
-❌ LLM agent framework (we integrate with any, not compete)
-❌ Tool execution (we govern BEFORE tool calls, not execute)
-❌ Database/persistence layer (audit export is optional)
-❌ Monitoring/observability platform (we provide decisions, not dashboards)
+- Workflow engine (use LangGraph, Temporal, etc.)
+- Rule engine (we use simple YAML policies, not Drools/OPA)
+- LLM agent framework (we integrate with any, not compete)
+- Tool execution (we govern BEFORE tool calls, not execute)
+- Database/persistence layer (audit export is optional)
+- Monitoring/observability platform (we provide decisions, not dashboards)
 
 **Why this distinction matters:**
 
@@ -325,15 +325,15 @@ If you need:
 
 **Anti-pattern (don't do this):**
 ```
-❌ "Add feature X to governance gate"
+"Add feature X to governance gate"
 ```
 Feature creep destroys clarity.
 
 **Correct pattern:**
 ```
-✅ "Use governance gate to protect feature X"
-✅ "Consume governance decisions in monitoring system"
-✅ "Build policy management UI on top of YAML policies"
+"Use governance gate to protect feature X"
+"Consume governance decisions in monitoring system"
+"Build policy management UI on top of YAML policies"
 ```
 
 ---
