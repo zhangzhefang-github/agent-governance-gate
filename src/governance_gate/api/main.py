@@ -6,6 +6,7 @@ Provides framework-agnostic REST endpoints for evaluating governance decisions.
 
 import os
 import time
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
 
@@ -111,18 +112,76 @@ async def evaluate_decision(request: GovernanceRequest):
         policy_evaluator: Optional[PolicyEvaluator] = None
         policy_version = None
         policy_name = None
+        policy_status = "valid"  # Track policy loading status
+        policy_error = None  # Track policy error for logging
 
         if request.policy_path:
             try:
                 loader = get_policy_loader(request.policy_path)
                 policy_dict = loader.load()
-                policy_evaluator = PolicyEvaluator(policy_dict)
-                policy_version = policy_dict.get("version")
-                policy_name = policy_dict.get("name")
+
+                # Validate policy structure
+                try:
+                    from governance_gate.policy.schema_validation import validate_policy_schema
+                    errors = validate_policy_schema(policy_dict)
+                    if errors:
+                        raise PolicyValidationError(f"Policy validation failed: {', '.join(errors)}")
+
+                    # Extract policy metadata for tracking
+                    policy_name = policy_dict.get("name")
+                    policy_version = policy_dict.get("version")
+
+                    # Create policy evaluator with loaded policy
+                    policy_evaluator = PolicyEvaluator(policy_dict)
+                except Exception as validation_error:
+                    # Policy file exists but is invalid
+                    policy_evaluator = None
+                    policy_error = f"Policy validation failed: {validation_error}"
+                    policy_status = "invalid"
+
             except (PolicyError, PolicyValidationError, FileNotFoundError) as e:
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail=f"Policy error: {e}"
+                # Policy file not found or cannot be loaded
+                policy_evaluator = None
+                policy_error = f"Policy load failed: {e}"
+                policy_status = "invalid"
+
+        # If policy failed to load, return degraded response based on failure mode
+        if policy_status == "invalid" and request.policy_path:
+            from governance_gate.core.decision import generate_trace_id
+
+            if config.failure_mode == "fail_closed":
+                return DecisionResponse(
+                    action="ESCALATE",
+                    rationale=f"Policy load failed: {policy_error}",
+                    trace_id=generate_trace_id(),
+                    policy_version=None,
+                    policy_name=None,
+                    decision_code=None,
+                    final_gate=None,
+                    gate_decisions={},
+                    evidence_summary={},
+                    required_steps=["Manual review required due to policy loading failure"],
+                    timestamp=datetime.now(timezone.utc).isoformat(),
+                    latency_ms=None,
+                    policy_status="invalid",
+                    failure_mode=config.failure_mode,
+                )
+            else:  # fail_open
+                return DecisionResponse(
+                    action="RESTRICT",
+                    rationale=f"Policy load failed: {policy_error}. Response limited.",
+                    trace_id=generate_trace_id(),
+                    policy_version=None,
+                    policy_name=None,
+                    decision_code=None,
+                    final_gate=None,
+                    gate_decisions={},
+                    evidence_summary={},
+                    required_steps=["System unavailable - showing limited response"],
+                    timestamp=datetime.now(timezone.utc).isoformat(),
+                    latency_ms=None,
+                    policy_status="invalid",
+                    failure_mode=config.failure_mode,
                 )
 
         # Build Intent
@@ -182,6 +241,8 @@ async def evaluate_decision(request: GovernanceRequest):
             required_steps=decision.required_steps,
             timestamp=decision.timestamp,
             latency_ms=round(latency_ms, 2),
+            policy_status=policy_status,
+            failure_mode=config.failure_mode,
         )
 
     except ValidationError as e:
@@ -198,9 +259,13 @@ async def evaluate_decision(request: GovernanceRequest):
             # Conservative: ESCALATE to human
             from governance_gate.core.decision import generate_trace_id
 
+            rationale = f"Governance unavailable (fail-closed mode): {str(e)}"
+            if policy_error:
+                rationale = f"{rationale} | Policy error: {policy_error}"
+
             return DecisionResponse(
                 action="ESCALATE",
-                rationale=f"Governance unavailable (fail-closed mode): {str(e)}",
+                rationale=rationale,
                 trace_id=generate_trace_id(),
                 policy_version=None,
                 policy_name=None,
@@ -211,14 +276,20 @@ async def evaluate_decision(request: GovernanceRequest):
                 required_steps=["Manual review required due to governance system failure"],
                 timestamp=time.time(),
                 latency_ms=None,
+                policy_status=policy_status,  # "invalid" if policy loading failed
+                failure_mode=config.failure_mode,
             )
         else:  # fail_open
             # Less conservative: RESTRICT with warning
             from governance_gate.core.decision import generate_trace_id
 
+            rationale = f"Governance unavailable (fail-open mode): {str(e)}. Response limited."
+            if policy_error:
+                rationale = f"{rationale} | Policy error: {policy_error}"
+
             return DecisionResponse(
                 action="RESTRICT",
-                rationale=f"Governance unavailable (fail-open mode): {str(e)}. Response limited.",
+                rationale=rationale,
                 trace_id=generate_trace_id(),
                 policy_version=None,
                 policy_name=None,
@@ -229,15 +300,21 @@ async def evaluate_decision(request: GovernanceRequest):
                 required_steps=["System unavailable - showing limited response"],
                 timestamp=time.time(),
                 latency_ms=None,
+                policy_status=policy_status,
+                failure_mode=config.failure_mode,
             )
     except Exception as e:
         # Unexpected errors - use failure mode
         if config.failure_mode == "fail_closed":
             from governance_gate.core.decision import generate_trace_id
 
+            rationale = f"System error (fail-closed mode): {str(e)}"
+            if policy_error:
+                rationale = f"{rationale} | Policy error: {policy_error}"
+
             return DecisionResponse(
                 action="ESCALATE",
-                rationale=f"System error (fail-closed mode): {str(e)}",
+                rationale=rationale,
                 trace_id=generate_trace_id(),
                 policy_version=None,
                 policy_name=None,
@@ -248,13 +325,19 @@ async def evaluate_decision(request: GovernanceRequest):
                 required_steps=["Manual review required due to system failure"],
                 timestamp=time.time(),
                 latency_ms=None,
+                policy_status=policy_status,
+                failure_mode=config.failure_mode,
             )
         else:  # fail_open
             from governance_gate.core.decision import generate_trace_id
 
+            rationale = f"System error (fail-open mode): {str(e)}. Showing limited response."
+            if policy_error:
+                rationale = f"{rationale} | Policy error: {policy_error}"
+
             return DecisionResponse(
                 action="RESTRICT",
-                rationale=f"System error (fail-open mode): {str(e)}. Showing limited response.",
+                rationale=rationale,
                 trace_id=generate_trace_id(),
                 policy_version=None,
                 policy_name=None,
@@ -265,6 +348,8 @@ async def evaluate_decision(request: GovernanceRequest):
                 required_steps=["System unavailable - showing limited response"],
                 timestamp=time.time(),
                 latency_ms=None,
+                policy_status=policy_status,
+                failure_mode=config.failure_mode,
             )
 
 

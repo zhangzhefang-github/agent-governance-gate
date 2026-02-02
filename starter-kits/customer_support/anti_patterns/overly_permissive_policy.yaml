@@ -1,0 +1,88 @@
+# ANTI-PATTERN: Overly Permissive Policy
+# This policy is DANGEROUS and should NOT be used in production.
+#
+# Why it's dangerous:
+# - All thresholds set to zero (essentially disabled)
+# - No safety checks for fraud/illegal/security keywords
+# - No human oversight for financial/authority/sensitive intents
+# - Allows all intents to proceed without restrictions
+#
+# Expected result: Agents can make unauthorized commitments, provide
+# incorrect information, and miss fraud attempts.
+
+version: "1.0.0-anti-pattern"
+name: OVERLY_PERMISSIVE_DANGEROUS
+description: |
+  ⚠️ ANTI-PATTERN ⚠️
+  This policy demonstrates what NOT to do.
+  All gates are disabled or set to permissive thresholds.
+  Do NOT use this configuration in production.
+
+gates:
+  # Danger: All thresholds disabled
+  fact_verifiability:
+    verifiable_threshold: 0.0  # ❌ DANGEROUS: Accept any facts, even unverified
+    require_realtime_facts: []  # ❌ DANGEROUS: No real-time verification required
+    stop_on_unverifiable: false  # Always RESTRICT, never STOP
+
+  uncertainty:
+    confidence_threshold: 0.0  # ❌ DANGEROUS: Accept any confidence level
+    stop_on_conflict: false  # ❌ DANGEROUS: Ignore conflicting results
+    outdated_version_days: 99999  # ❌ DANGEROUS: Never consider KB outdated
+
+  responsibility:
+    # ❌ DANGEROUS: Empty lists = no restrictions
+    financial_intents: []  # No financial commitment checks
+    authority_intents: []  # No authority boundary checks
+    sensitive_intents: []  # No sensitive topic checks
+    stop_on_sensitive: false  # Always ESCALATE, never STOP
+
+  safety:
+    # ❌ DANGEROUS: No keywords detected
+    fraud_keywords: []  # No fraud detection
+    illegal_keywords: []  # No illegal activity detection
+    security_keywords: []  # No security threat detection
+    stop_on_sensitive_stop: false
+
+# All rules disabled
+rules:
+  - name: low_intent_confidence
+    priority: 100
+    conditions:
+      intent.confidence:
+        lt: 0.7
+    action: RESTRICT
+    reason: Intent confidence is low - request clarification
+    enabled: false  # ❌ DANGEROUS: Rule disabled
+
+  - name: financial_impact
+    priority: 60
+    conditions:
+      evidence.topic.has_financial_impact:
+        is_true: true
+    action: ESCALATE
+    reason: Request has financial responsibility - requires human review
+    enabled: false  # ❌ DANGEROUS: Rule disabled
+
+  # All other rules also disabled...
+  - name: any_remaining_rule
+    priority: 1
+    conditions:
+      intent.name:
+        exists: true
+    action: ALLOW
+    reason: Allow everything
+    enabled: true  # ✅ But this catch-all allows all intents
+
+metadata:
+  version: "anti-pattern-1.0"
+  last_updated: "2025-01-01"
+  author: "Governance Team"
+  tags:
+    - anti-pattern
+    - dangerous
+    - do-not-use
+  warning: |
+    ⚠️ This is an educational anti-pattern.
+    Do NOT use in production.
+    See README.md for explanation.

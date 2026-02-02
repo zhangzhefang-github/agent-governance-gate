@@ -1,0 +1,131 @@
+# ANTI-PATTERN: No Uncertainty Handling
+# This policy is DANGEROUS and should NOT be used in production.
+#
+# Why it's dangerous:
+# - Uncertainty gate disabled or set to permissive thresholds
+# - Allows agents to act with low confidence
+# - Ignores conflicting retrieval results
+# - Uses outdated knowledge base content
+#
+# Expected result: Knowledge base outdated (refund policy changed from 30 to 14 days),
+# agent confidently states "Our refund policy is 30 days", customer relies on outdated info,
+# complaint escalates when refund denied.
+
+version: "1.0.0-anti-pattern"
+name: NO_UNCERTAINTY_HANDLING_DANGEROUS
+description: |
+  ⚠️ ANTI-PATTERN ⚠️
+  This policy demonstrates the danger of removing the Uncertainty gate.
+  Without this gate, agents act confidently with incomplete or conflicting information.
+  Do NOT use this configuration.
+
+gates:
+  fact_verifiability:
+    verifiable_threshold: 0.7
+    require_realtime_facts:
+      - order_status_query
+    stop_on_unverifiable: false
+
+  # ❌ DANGEROUS: Uncertainty handling disabled
+  uncertainty:
+    confidence_threshold: 0.0  # ❌ DANGEROUS: Accept any confidence level
+    stop_on_conflict: false  # ❌ DANGEROUS: Ignore conflicting results
+    outdated_version_days: 99999  # ❌ DANGEROUS: Never consider KB outdated
+
+  responsibility:
+    financial_intents:
+      - refund
+      - compensation
+    authority_intents:
+      - policy_change
+    sensitive_intents:
+      - legal_advice
+    stop_on_sensitive: false
+
+  safety:
+    fraud_keywords_count: 13
+    illegal_keywords_count: 14
+    security_keywords_count: 7
+    stop_on_sensitive_stop: false
+
+rules:
+  # ❌ DANGEROUS: Uncertainty rules disabled
+  - name: low_rag_confidence
+    priority: 70
+    conditions:
+      evidence.rag.confidence:
+        lt: 0.6
+    action: RESTRICT
+    reason: Retrieval confidence is below threshold
+    enabled: false  # ❌ DANGEROUS: Allow low confidence
+
+  - name: conflicting_retrieval
+    priority: 50
+    conditions:
+      evidence.rag.has_conflicts:
+        is_true: true
+    action: RESTRICT
+    reason: Retrieval has conflicting results - cannot determine answer
+    enabled: false  # ❌ DANGEROUS: Ignore conflicts
+
+  - name: outdated_knowledge
+    priority: 40
+    conditions:
+      evidence.rag.kb_age_days:
+        gt: 30
+    action: RESTRICT
+    reason: Knowledge base is outdated - recommend refresh
+    enabled: false  # ❌ DANGEROUS: Use outdated info
+
+  # Other rules remain enabled
+  - name: low_intent_confidence
+    priority: 100
+    conditions:
+      intent.confidence:
+        lt: 0.7
+    action: RESTRICT
+    reason: Intent confidence is low - request clarification
+    enabled: true
+
+  - name: financial_impact
+    priority: 60
+    conditions:
+      evidence.topic.has_financial_impact:
+        is_true: true
+    action: ESCALATE
+    reason: Request has financial responsibility - requires human review
+    enabled: true
+
+metadata:
+  version: "anti-pattern-5.0"
+  last_updated: "2025-01-01"
+  author: "Governance Team"
+  tags:
+    - anti-pattern
+    - dangerous
+    - no-uncertainty-handling
+  warning: |
+    ⚠️ This is an educational anti-pattern.
+
+    Without uncertainty handling, the following occur:
+
+    Scenario 1: Low confidence
+    - RAG confidence: 0.2 (very low)
+    - Agent: "Here's the answer: [hallucinated content]"
+    - Impact: Customer receives incorrect information
+
+    Scenario 2: Conflicting results
+    - Doc A: "Refund policy is 30 days"
+    - Doc B: "Refund policy is 14 days"
+    - Agent: "Our refund policy is 30 days" (picks one arbitrarily)
+    - Impact: Customer misled, complaint escalates
+
+    Scenario 3: Outdated knowledge base
+    - KB updated 200 days ago (policy changed since then)
+    - Agent: "Our refund policy is 30 days" (outdated info)
+    - Impact: Customer relies on wrong info, loses trust
+
+    Correct approach:
+    - Set confidence_threshold ≥ 0.6
+    - Enable stop_on_conflict for critical domains
+    - Update knowledge base frequently (≤ 30 days old)

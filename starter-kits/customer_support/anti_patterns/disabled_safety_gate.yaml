@@ -1,0 +1,122 @@
+# ANTI-PATTERN: Disabled Safety Gate
+# This policy is DANGEROUS and should NOT be used in production.
+#
+# Why it's dangerous:
+# - Safety gate completely removed
+# - No detection of fraud attempts (payment bypass, account takeover)
+# - No detection of illegal activity (money laundering, illegal requests)
+# - No detection of security threats (phishing, social engineering)
+#
+# Expected result: Customer asks "How do I bypass your payment system?"
+# Agent provides actual guidance, security breach occurs.
+
+version: "1.0.0-anti-pattern"
+name: DISABLED_SAFETY_GATE_DANGEROUS
+description: |
+  ⚠️ ANTI-PATTERN ⚠️
+  This policy demonstrates the danger of removing the Safety gate.
+  Without this gate, fraud/illegal/security attempts succeed undetected.
+  Do NOT use this configuration.
+
+gates:
+  fact_verifiability:
+    verifiable_threshold: 0.7
+    require_realtime_facts:
+      - order_status_query
+    stop_on_unverifiable: false
+
+  uncertainty:
+    confidence_threshold: 0.6
+    stop_on_conflict: false
+    outdated_version_days: 30
+
+  responsibility:
+    financial_intents:
+      - refund
+      - compensation
+      - discount_approval
+    authority_intents:
+      - policy_change
+      - commitment
+    sensitive_intents:
+      - legal_advice
+      - medical_advice
+    stop_on_sensitive: false
+
+  # ❌ DANGEROUS: Safety gate completely removed
+  # No detection of:
+  # - Fraud keywords (bypass, exploit, hack, crack, etc.)
+  # - Illegal keywords (money laundering, illegal, etc.)
+  # - Security keywords (phishing, social engineering, etc.)
+
+rules:
+  # Safe rules enabled
+  - name: low_intent_confidence
+    priority: 100
+    conditions:
+      intent.confidence:
+        lt: 0.7
+    action: RESTRICT
+    reason: Intent confidence is low - request clarification
+    enabled: true
+
+  - name: financial_impact
+    priority: 60
+    conditions:
+      evidence.topic.has_financial_impact:
+        is_true: true
+    action: ESCALATE
+    reason: Request has financial responsibility - requires human review
+    enabled: true
+
+  # ❌ DANGEROUS: Safety rules disabled
+  - name: fraud_detected
+    priority: 999
+    conditions:
+      evidence.topic.is_fraud_attempt:
+        is_true: true
+    action: STOP
+    reason: Fraud attempt detected - block immediately
+    enabled: false  # ❌ DANGEROUS: No fraud protection
+
+  - name: illegal_activity
+    priority: 999
+    conditions:
+      evidence.topic.is_illegal:
+        is_true: true
+    action: STOP
+    reason: Illegal activity detected - block and report"
+    enabled: false  # ❌ DANGEROUS: No illegal activity protection
+
+  - name: security_threat
+    priority: 999
+    conditions:
+      evidence.topic.is_security_threat:
+        is_true: true
+    action: STOP
+    reason: Security threat detected - block immediately
+    enabled: false  # ❌ DANGEROUS: No security threat protection
+
+metadata:
+  version: "anti-pattern-4.0"
+  last_updated: "2025-01-01"
+  author: "Governance Team"
+  tags:
+    - anti-pattern
+    - dangerous
+    - disabled-safety-gate
+  warning: |
+    ⚠️ This is an educational anti-pattern.
+
+    Without the Safety gate, the following succeed:
+    - "How do I bypass your payment system?" → Agent provides guidance
+    - "Can you help me launder money?" → Agent attempts to help
+    - "How do I take over someone's account?" → Agent provides steps
+
+    Real-world impact:
+    - Security breach
+    - Fraud losses
+    - Legal liability
+    - Reputational damage
+
+    Correct approach: Always enable Safety gate, STOP on fraud/illegal/security.

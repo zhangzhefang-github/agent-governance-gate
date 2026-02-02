@@ -1,0 +1,108 @@
+# ANTI-PATTERN: Blind Trust in Confidence
+# This policy is DANGEROUS and should NOT be used in production.
+#
+# Why it's dangerous:
+# - Confidence thresholds set to 0.1 (essentially disabled)
+# - Allows low-confidence intent recognition to proceed
+# - Results in wrong actions taken on misclassified intents
+# - Creates silent failures with no visibility
+#
+# Expected result: Intent "refund_request" (confidence 0.3) misclassified
+# as "order_status_query", agent provides order info instead of processing refund,
+# customer gets wrong response.
+
+version: "1.0.0-anti-pattern"
+name: BLIND_TRUST_CONFIDENCE_DANGEROUS
+description: |
+  ⚠️ ANTI-PATTERN ⚠️
+  This policy demonstrates the danger of setting confidence thresholds too low.
+  Low confidence intent recognition leads to incorrect actions.
+  Do NOT use this configuration.
+
+gates:
+  fact_verifiability:
+    verifiable_threshold: 0.7
+    require_realtime_facts:
+      - order_status_query
+    stop_on_unverifiable: false
+
+  # ❌ DANGEROUS: Confidence threshold set to 0.1
+  uncertainty:
+    confidence_threshold: 0.1  # ❌ DANGEROUS: Accept very low confidence
+    stop_on_conflict: false
+    outdated_version_days: 30
+
+  responsibility:
+    financial_intents:
+      - refund
+      - compensation
+      - discount_approval
+      - credit_request
+      - payment_adjustment
+    authority_intents:
+      - policy_change
+      - contract_modification
+      - commitment
+      - guarantee
+    sensitive_intents:
+      - legal_advice
+      - medical_advice
+      - regulatory_compliance
+    stop_on_sensitive: false
+
+  safety:
+    fraud_keywords_count: 13
+    illegal_keywords_count: 14
+    security_keywords_count: 7
+    stop_on_sensitive_stop: false
+
+rules:
+  # ❌ DANGEROUS: Low confidence rule disabled
+  - name: low_intent_confidence
+    priority: 100
+    conditions:
+      intent.confidence:
+        lt: 0.7
+    action: RESTRICT
+    reason: Intent confidence is low - request clarification
+    enabled: false  # ❌ DANGEROUS: Allow low confidence to proceed
+
+  # Other rules enabled but may trigger on wrong intents
+  - name: financial_impact
+    priority: 60
+    conditions:
+      evidence.topic.has_financial_impact:
+        is_true: true
+    action: ESCALATE
+    reason: Request has financial responsibility - requires human review
+    enabled: true
+
+  - name: unverified_realtime_facts
+    priority: 80
+    conditions:
+      evidence.facts.verifiable:
+        is_false: true
+      evidence.facts.requires_realtime:
+        is_true: true
+    action: RESTRICT
+    reason: Intent requires real-time facts but they are not verifiable
+    enabled: true
+
+metadata:
+  version: "anti-pattern-3.0"
+  last_updated: "2025-01-01"
+  author: "Governance Team"
+  tags:
+    - anti-pattern
+    - dangerous
+    - low-confidence-threshold
+  warning: |
+    ⚠️ This is an educational anti-pattern.
+
+    Setting confidence_threshold to 0.1 means:
+    - Intent "refund" (confidence 0.3) might be misclassified as "order_status"
+    - Agent takes wrong action based on misclassification
+    - Customer receives incorrect response
+    - No visibility into the error (no RESTRICT/ESCALATE)
+
+    Correct threshold: ≥ 0.7 for production

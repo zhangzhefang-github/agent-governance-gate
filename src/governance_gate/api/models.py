@@ -68,6 +68,8 @@ class DecisionResponse(BaseModel):
     required_steps: List[str] = Field(default_factory=list)
     timestamp: str
     latency_ms: Optional[float] = None  # Decision evaluation latency in milliseconds
+    policy_status: Optional[str] = None  # "valid" or "invalid" - indicates policy loading/validation status
+    failure_mode: Optional[str] = None  # "fail_closed" or "fail_open" - indicates which failure mode was used
 
 
 class PolicyValidationRequest(BaseModel):

@@ -1,0 +1,115 @@
+# ANTI-PATTERN: Missing Responsibility Gate
+# This policy is DANGEROUS and should NOT be used in production.
+#
+# Why it's dangerous:
+# - Responsibility gate is completely removed
+# - No human oversight for financial commitments (refunds, credits, adjustments)
+# - No checks for authority violations (policy exceptions, commitments)
+# - No protection for sensitive topics (legal, medical, regulatory)
+#
+# Expected result: Agents can process $5,000 refunds, make policy exceptions,
+# and provide legal advice without human review.
+
+version: "1.0.0-anti-pattern"
+name: NO_RESPONSIBILITY_GATE_DANGEROUS
+description: |
+  ⚠️ ANTI-PATTERN ⚠️
+  This policy demonstrates the danger of removing the Responsibility gate.
+  Without this gate, financial/authority/sensitive intents proceed without review.
+  Do NOT use this configuration.
+
+gates:
+  fact_verifiability:
+    verifiable_threshold: 0.7
+    require_realtime_facts:
+      - order_status_query
+      - account_balance_query
+    stop_on_unverifiable: false
+
+  uncertainty:
+    confidence_threshold: 0.6
+    stop_on_conflict: false
+    outdated_version_days: 30
+
+  # ❌ DANGEROUS: Responsibility gate completely missing
+  # No checks for:
+  # - financial_intents (refund, compensation, credits)
+  # - authority_intents (policy changes, commitments)
+  # - sensitive_intents (legal, medical, regulatory advice)
+
+  safety:
+    fraud_keywords_count: 13
+    illegal_keywords_count: 14
+    security_keywords_count: 7
+    stop_on_sensitive_stop: false
+
+# Rules that would normally be handled by Responsibility gate
+rules:
+  # ❌ DANGEROUS: Financial impact rule disabled
+  - name: financial_impact
+    priority: 60
+    conditions:
+      evidence.topic.has_financial_impact:
+        is_true: true
+    action: ESCALATE
+    reason: Request has financial responsibility - requires human review
+    enabled: false  # Disabled because Responsibility gate is missing
+
+  # ❌ DANGEROUS: Authority rule disabled
+  - name: authority_required
+    priority: 70
+    conditions:
+      evidence.topic.requires_authority:
+        is_true: true
+    action: ESCALATE
+    reason: Request requires organizational authority - human review needed
+    enabled: false  # Disabled because Responsibility gate is missing
+
+  # ❌ DANGEROUS: Sensitive topic rule disabled
+  - name: sensitive_topic
+    priority: 80
+    conditions:
+      evidence.topic.is_sensitive:
+        is_true: true
+    action: ESCALATE
+    reason: Sensitive topic detected - requires human review
+    enabled: false  # Disabled because Responsibility gate is missing
+
+  # Safe rules remain enabled
+  - name: low_intent_confidence
+    priority: 100
+    conditions:
+      intent.confidence:
+        lt: 0.7
+    action: RESTRICT
+    reason: Intent confidence is low - request clarification
+    enabled: true
+
+  - name: unverified_realtime_facts
+    priority: 80
+    conditions:
+      evidence.facts.verifiable:
+        is_false: true
+      evidence.facts.requires_realtime:
+        is_true: true
+    action: RESTRICT
+    reason: Intent requires real-time facts but they are not verifiable
+    enabled: true
+
+metadata:
+  version: "anti-pattern-2.0"
+  last_updated: "2025-01-01"
+  author: "Governance Team"
+  tags:
+    - anti-pattern
+    - dangerous
+    - missing-responsibility-gate
+  warning: |
+    ⚠️ This is an educational anti-pattern.
+    The Responsibility gate is critical for any domain with:
+    - Financial impact
+    - Authority requirements
+    - Legal/regulatory sensitivity
+    - Irreversible actions
+
+    Removing this gate creates unacceptable risk.

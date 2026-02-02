@@ -181,6 +181,84 @@ workflow.add_conditional_edges(
 
 ---
 
+## Decision Envelope v1 (Stable Fields)
+
+**API Contract Stability Commitment**
+
+The following fields constitute the stable decision envelope for v0.1.x:
+
+| Field | Type | Stability Commitment |
+|-------|------|---------------------|
+| `trace_id` | string | ✅ Stable - UUID identifier, will not be removed or repurposed |
+| `timestamp` | string (ISO 8601) | ✅ Stable - Decision timestamp in UTC |
+| `action` | string | ✅ Stable - One of: ALLOW/RESTRICT/ESCALATE/STOP |
+| `final_gate` | string \| null | ✅ Stable - Name of gate that determined action (null for ALLOW) |
+| `decision_code` | string \| null | ✅ Stable - Machine-readable code for aggregation (e.g., "SAFETY_STOP_FRAUD") |
+| `policy_version` | string \| null | ✅ Stable - Version of policy used for evaluation |
+| `policy_name` | string \| null | ✅ Stable | - Name of policy used for evaluation |
+| `latency_ms` | float \| null | ✅ Stable - Decision evaluation time in milliseconds |
+
+**Stability Guarantee:**
+
+> Future API versions may add additional fields, but existing fields listed above will not be removed, renamed, or have their semantics changed without a major version bump.
+
+**Optional Fields:**
+
+Additional optional fields may be added in future v0.1.x releases for **observability and operational visibility only** (e.g., debugging metrics, internal state, policy loading status).
+
+**Guarantee:** Optional fields will never affect decision semantics or be required for integration. Existing integrations will continue to work without modification.
+
+**What this means for integration:**
+
+- You can safely build production logic depending on these fields
+- JSON parsing will remain compatible across v0.1.x releases
+- Log queries aggregating these fields will continue to work
+- Monitoring dashboards using these fields will not break
+
+**Example Response (v0.1.1):**
+
+```json
+{
+  "action": "STOP",
+  "final_gate": "safety",
+  "trace_id": "ff69b873-7b5a-4bc1-a18e-d0814a87cacb",
+  "timestamp": "2025-02-02T15:13:53.123Z",
+  "decision_code": "SAFETY_STOP_FRAUD",
+  "policy_version": "1.0",
+  "policy_name": "customer_support",
+  "latency_ms": 12.34,
+  "gate_decisions": {...},        // Additional context (may change)
+  "evidence_summary": {...},      // Additional context (may change)
+  "required_steps": [...]         // Additional context (may change)
+}
+```
+
+**Fields NOT in Stable Contract:**
+
+The following fields provide additional context but may change between versions:
+
+- `gate_decisions` - Structure may be enhanced with more metadata
+- `evidence_summary` - Fields may be added or removed
+- `required_steps` - List structure may change
+- `rationale` - Text content may vary
+
+**Migration Path:**
+
+When v0.2.0 is released (hypothetical):
+
+- ✅ All 8 stable fields remain compatible
+- ✅ Your logging, dashboards, alerts continue working
+- ✅ New fields may be added (e.g., `risk_score`, `confidence_breakdown`)
+- ⚠️  Major version bump only if stable fields are removed/changed
+
+**Versioning Policy:**
+
+- **v0.1.x**: Stable fields maintained, additions only
+- **v0.2.0**: Additions possible, stable fields maintained
+- **v1.0.0**: First major version - breaking changes would require this
+
+---
+
 ## What Information to Pass
 
 ### Minimal (Required)

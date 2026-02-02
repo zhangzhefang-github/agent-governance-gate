@@ -32,18 +32,62 @@ export GOVGATE_FAILURE_MODE=fail_open
 
 **Use case:** Production systems where avoiding unauthorized actions is critical
 
-### fail_open (Testing Only)
+### fail_open (Testing Only - Degradation Mode)
 
 **When governance gate fails:**
 - Policy load error → RESTRICT with warning
 - Pipeline evaluation error → RESTRICT with warning
 - System error → RESTRICT with warning
 
-**Rationale:** Less conservative - allow limited responses when governance is unavailable
+**Rationale:** Degradation mode (降级模式) - provide safe, limited responses when governance is unavailable
 
-**Use case:** Development, testing, or demo environments
+**⚠️ IMPORTANT: fail_open is NOT permission to proceed**
+
+fail_open is a **degradation mode**, not a bypass:
+- ✅ ALLOW: General guidance, safe information, help text
+- ❌ NOT ALLOWED: Financial commitments, policy changes, sensitive actions
+- ✅ ALLOW: "I'm currently operating in limited mode. Let me connect you with a human agent."
+- ❌ NOT ALLOWED: Executing the original intent (e.g., refunds, account changes)
+
+**Use case:** Development, testing, or demo environments only
 
 **⚠️ Warning:** Never use fail_open in production without careful consideration!
+
+## Understanding Degradation Mode (降级模式)
+
+**fail_open is a degradation strategy, not a safety bypass.**
+
+When governance is unavailable in fail_open mode:
+
+### What You CAN Do (Safe Responses)
+- ✅ Show general guidance: "I can help you with billing questions."
+- ✅ Provide safe information: "Our refund policy takes 3-5 days."
+- ✅ Offer connection to human: "Let me connect you with an agent who can help."
+- ✅ Acknowledge limitation: "I'm operating in limited mode right now."
+
+### What You CANNOT Do (Protected Actions)
+- ❌ Execute financial transactions (refunds, credits, adjustments)
+- ❌ Make policy changes or exceptions
+- ❌ Commit to guarantees or obligations
+- ❌ Modify account data or settings
+- ❌ Perform sensitive operations (legal, medical, regulatory)
+
+### Integration Example
+
+```python
+# Correct fail_open handling
+if decision.action == "RESTRICT" and decision.failure_mode == "fail_open":
+    # Show safe guidance only
+    return "I'm currently operating in limited mode. " \
+           "I can provide general information, but for account-specific " \
+           "requests, I'll connect you with a human agent."
+
+# WRONG: Do NOT execute sensitive actions
+if decision.action == "RESTRICT" and decision.failure_mode == "fail_open":
+    execute_refund()  # ❌ DANGEROUS - governance is unavailable!
+```
+
+**Key Principle:** fail_open exists to provide graceful degradation, not to bypass governance controls.
 
 ## Example Scenarios
 
@@ -63,7 +107,8 @@ export GOVGATE_FAILURE_MODE=fail_open
 {
   "action": "RESTRICT",
   "rationale": "Governance unavailable (fail-open mode): Policy file not found. Response limited.",
-  "required_steps": ["System unavailable - showing limited response"]
+  "required_steps": ["System unavailable - showing limited response"],
+  "note": "In fail_open mode, show safe help/guidance only. DO NOT execute sensitive actions."
 }
 ```
 
@@ -83,7 +128,8 @@ export GOVGATE_FAILURE_MODE=fail_open
 {
   "action": "RESTRICT",
   "rationale": "System error (fail-open mode): Division by zero. Showing limited response.",
-  "required_steps": ["System unavailable - showing limited response"]
+  "required_steps": ["System unavailable - showing limited response"],
+  "note": "In fail_open mode, show safe help/guidance only. DO NOT execute sensitive actions."
 }
 ```
 
@@ -117,9 +163,14 @@ govgate serve --port 8000
 ```
 
 **Why:**
-- fail_open allows you to continue working when testing
-- Reduces friction during development
+- fail_open allows you to continue testing with graceful degradation
+- Reduces friction during development by showing safe help text
 - Still logs warnings for visibility
+
+**⚠️ Remember:** In fail_open mode, your integration should:
+- Show general guidance and safe information only
+- NEVER execute sensitive actions (refunds, commitments, policy changes)
+- Always offer to connect to a human agent
 
 ### Monitoring
 

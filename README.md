@@ -1,5 +1,7 @@
 # agent-governance-gate
 
+[English](README.md) | [简体中文](README_zh.md)
+
 A governance gate for Agent systems that decides whether an action is allowed, restricted, escalated, or stopped,
 based on risk and responsibility, not just intent.
 

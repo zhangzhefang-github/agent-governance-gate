@@ -138,7 +138,16 @@ class TestDecisionEndpoint:
 
         response = client.post("/decision", json=sample_request)
 
-        assert response.status_code == 400
+        # Should return 200 with degraded response (not error)
+        assert response.status_code == 200
+        data = response.json()
+
+        # Should have failure mode information
+        assert data["failure_mode"] in ["fail_closed", "fail_open"]
+        # Should indicate policy is invalid
+        assert data["policy_status"] == "invalid"
+        # Should return safe action (ESCALATE for fail_closed, RESTRICT for fail_open)
+        assert data["action"] in ["ESCALATE", "RESTRICT"]
 
     def test_decision_missing_intent(self, client):
         """Test decision with missing intent field."""
