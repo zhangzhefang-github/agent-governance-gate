@@ -80,6 +80,68 @@ print(f"Who blocked: {decision.final_gate}")  # "safety", "responsibility", etc.
 
 ---
 
+## Integration Options
+
+Choose the integration method that fits your architecture:
+
+### Option 1: Python Library (Recommended)
+
+**Best for:** Native Python applications, custom agents, monolithic systems
+
+**Performance:** Lowest latency (~1-2ms), no network overhead
+
+**Documentation:** [Integration Guide](docs/integration.md)
+
+**Quick start:**
+```python
+from governance_gate.core.pipeline import GovernancePipeline
+from governance_gate.gates import SafetyGate, ResponsibilityGate
+from governance_gate.core.types import Intent, Context, Evidence
+
+pipeline = GovernancePipeline(gates=[SafetyGate(), ResponsibilityGate()])
+decision = pipeline.evaluate(intent, context, evidence)
+
+if decision.action == DecisionAction.ALLOW:
+    return execute_tools()
+elif decision.action == DecisionAction.ESCALATE:
+    return escalate_to_human(decision.rationale)
+```
+
+### Option 2: HTTP API
+
+**Best for:** Microservices, multi-language systems, external deployments
+
+**Performance:** Network overhead (~10-50ms)
+
+**Documentation:** [API Reference](docs/api.md)
+
+**Quick start:**
+```bash
+# Start server
+govgate serve --port 8000
+
+# Make request
+curl -X POST http://localhost:8000/decision \
+  -H "Content-Type: application/json" \
+  -d '{
+    "intent": {"name": "refund_request", "confidence": 0.9},
+    "context": {"user_id": "user_123", "channel": "web"},
+    "evidence": {"facts": {...}, "rag": {...}}
+  }'
+```
+
+### Option 3: LangGraph / LangChain
+
+**Best for:** Agent framework users, workflow orchestration
+
+**Documentation:** [Framework Integration](docs/integration.md#langgraph-integration)
+
+**Example:** [starter-kits/customer_support/](starter-kits/customer_support/)
+
+**Need help choosing?** → See [Integration Guide](docs/integration.md#choosing-a-method)
+
+---
+
 ## Why this project exists
 
 Modern Agent and RAG systems are probabilistic by nature.

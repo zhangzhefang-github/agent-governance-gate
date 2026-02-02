@@ -79,6 +79,68 @@ print(f"拦截者: {decision.final_gate}")  # "safety", "responsibility" 等
 
 ---
 
+## 集成方式
+
+根据你的架构选择合适的集成方式：
+
+### 方式 1: Python 库（推荐）
+
+**适用场景：** 原生 Python 应用、自定义 agent、单体系统
+
+**性能：** 最低延迟（~1-2ms），无网络开销
+
+**文档：** [集成指南](docs/integration.md)
+
+**快速开始：**
+```python
+from governance_gate.core.pipeline import GovernancePipeline
+from governance_gate.gates import SafetyGate, ResponsibilityGate
+from governance_gate.core.types import Intent, Context, Evidence
+
+pipeline = GovernancePipeline(gates=[SafetyGate(), ResponsibilityGate()])
+decision = pipeline.evaluate(intent, context, evidence)
+
+if decision.action == DecisionAction.ALLOW:
+    return execute_tools()
+elif decision.action == DecisionAction.ESCALATE:
+    return escalate_to_human(decision.rationale)
+```
+
+### 方式 2: HTTP API
+
+**适用场景：** 微服务、多语言系统、外部部署
+
+**性能：** 网络开销（~10-50ms）
+
+**文档：** [API 参考](docs/api.md)
+
+**快速开始：**
+```bash
+# 启动服务
+govgate serve --port 8000
+
+# 发送请求
+curl -X POST http://localhost:8000/decision \
+  -H "Content-Type: application/json" \
+  -d '{
+    "intent": {"name": "refund_request", "confidence": 0.9},
+    "context": {"user_id": "user_123", "channel": "web"},
+    "evidence": {"facts": {...}, "rag": {...}}
+  }'
+```
+
+### 方式 3: LangGraph / LangChain
+
+**适用场景：** Agent 框架用户、工作流编排
+
+**文档：** [框架集成](docs/integration.md#langgraph-integration)
+
+**示例：** [starter-kits/customer_support/](starter-kits/customer_support/)
+
+**需要帮助选择？** → 查看 [集成指南](docs/integration.md#choosing-a-method)
+
+---
+
 ## 为什么存在这个项目
 
 现代 Agent 和 RAG 系统本质上是概率性的。
