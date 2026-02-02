@@ -87,9 +87,11 @@ print(f"拦截者: {decision.final_gate}")  # "safety", "responsibility" 等
 
 **适用场景：** 原生 Python 应用、自定义 agent、单体系统
 
-**性能：** 最低延迟（~1-2ms），无网络开销
+**架构形态：** 进程内集成（import + pipeline.evaluate）
 
-**文档：** [集成指南](docs/integration.md)
+**性能：** 1-2ms 典型值（进程内，无网络开销）
+
+**文档：** [集成指南 → Python 库](docs/integration.md#2-python-library-lowest-latency)
 
 **快速开始：**
 ```python
@@ -110,9 +112,13 @@ elif decision.action == DecisionAction.ESCALATE:
 
 **适用场景：** 微服务、多语言系统、外部部署
 
-**性能：** 网络开销（~10-50ms）
+**架构形态：** 进程外集成（POST /decision）
 
-**文档：** [API 参考](docs/api.md)
+**性能：** 10-50ms 典型值（含网络开销）
+
+**文档：** [集成指南 → HTTP API](docs/integration.md#1-http-api-simplest)
+
+**失败模式：** [fail_closed / fail_open](docs/failure_modes.md)
 
 **快速开始：**
 ```bash
@@ -133,11 +139,13 @@ curl -X POST http://localhost:8000/decision \
 
 **适用场景：** Agent 框架用户、工作流编排
 
-**文档：** [框架集成](docs/integration.md#langgraph-integration)
+**架构形态：** 图内集成（governance node + 条件路由）
+
+**文档：** [集成指南 → LangGraph](docs/integration.md#3-langgraph-integration-agent-frameworks)
 
 **示例：** [starter-kits/customer_support/](starter-kits/customer_support/)
 
-**需要帮助选择？** → 查看 [集成指南](docs/integration.md#choosing-a-method)
+**需要帮助选择？** → 查看 [集成指南](docs/integration.md#three-integration-patterns)
 
 ---
 
@@ -363,6 +371,7 @@ ESCALATE
 - 策略驱动的规则评估（YAML）
 - 框架无关的集成层
 - 生产系统的参考实现
+- [稳定 API 契约（v0.1.x）](docs/integration.md#decision-envelope-v1-stable-fields) - Decision Envelope 保证向后兼容
 
 **本项目不是：**
 

@@ -88,9 +88,11 @@ Choose the integration method that fits your architecture:
 
 **Best for:** Native Python applications, custom agents, monolithic systems
 
-**Performance:** Lowest latency (~1-2ms), no network overhead
+**Architecture:** In-process (import + pipeline.evaluate)
 
-**Documentation:** [Integration Guide](docs/integration.md)
+**Performance:** 1-2ms typical (in-process, no network)
+
+**Documentation:** [Integration Guide → Python Library](docs/integration.md#2-python-library-lowest-latency)
 
 **Quick start:**
 ```python
@@ -111,9 +113,13 @@ elif decision.action == DecisionAction.ESCALATE:
 
 **Best for:** Microservices, multi-language systems, external deployments
 
-**Performance:** Network overhead (~10-50ms)
+**Architecture:** Out-of-process (POST /decision)
 
-**Documentation:** [API Reference](docs/api.md)
+**Performance:** 10-50ms typical (including network)
+
+**Documentation:** [Integration Guide → HTTP API](docs/integration.md#1-http-api-simplest)
+
+**Failure modes:** [fail_closed / fail_open](docs/failure_modes.md)
 
 **Quick start:**
 ```bash
@@ -134,11 +140,13 @@ curl -X POST http://localhost:8000/decision \
 
 **Best for:** Agent framework users, workflow orchestration
 
-**Documentation:** [Framework Integration](docs/integration.md#langgraph-integration)
+**Architecture:** In-graph (governance node + conditional routing)
+
+**Documentation:** [Integration Guide → LangGraph](docs/integration.md#3-langgraph-integration-agent-frameworks)
 
 **Example:** [starter-kits/customer_support/](starter-kits/customer_support/)
 
-**Need help choosing?** → See [Integration Guide](docs/integration.md#choosing-a-method)
+**Need help choosing?** → See [Integration Guide](docs/integration.md#three-integration-patterns)
 
 ---
 
@@ -364,6 +372,7 @@ This project is intended for engineers and architects who:
 - Policy-driven rule evaluation (YAML)
 - Framework-agnostic integration layer
 - Reference implementation for production systems
+- [Stable API contract (v0.1.x)](docs/integration.md#decision-envelope-v1-stable-fields) - Decision Envelope guarantees backward compatibility
 
 **This project is NOT:**
 
