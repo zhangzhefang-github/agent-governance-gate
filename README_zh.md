@@ -1,5 +1,9 @@
 # agent-governance-gate
 
+[![测试: 42 通过](https://img.shields.io/badge/tests-42%20passing-brightgreen)]()
+[![版本: 0.1.1](https://img.shields.io/badge/version-0.1.1-blue)]()
+[![许可证: MIT](https://img.shields.io/badge/license-MIT-blue)]()
+
 [English](README.md) | [简体中文](README_zh.md)
 
 一个 Agent 系统的治理网关，基于风险和责任（而非仅仅是意图）来决定是否允许、限制、升级或停止某个操作。
@@ -96,6 +100,8 @@ print(f"拦截者: {decision.final_gate}")  # "safety", "responsibility" 等
 
 这些失败不是模型问题。
 它们是治理问题。
+
+**核心原则：** 概率性系统需要确定性的责任边界。工程系统必须知道何时不行动。
 
 ---
 
@@ -283,14 +289,6 @@ ESCALATE
 - 对系统故障负责，而不仅仅是演示
 - 设计必须安全停止的 AI 系统
 - 将 AI 视为基础设施，而非功能
-
----
-
-## 设计哲学
-
-概率性系统需要确定性的责任边界。
-
-工程系统必须知道何时不行动。
 
 ---
 

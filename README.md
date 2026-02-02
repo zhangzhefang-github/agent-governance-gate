@@ -1,5 +1,9 @@
 # agent-governance-gate
 
+[![Tests: 42 passing](https://img.shields.io/badge/tests-42%20passing-brightgreen)]()
+[![Version: 0.1.1](https://img.shields.io/badge/version-0.1.1-blue)]()
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue)]()
+
 [English](README.md) | [简体中文](README_zh.md)
 
 A governance gate for Agent systems that decides whether an action is allowed, restricted, escalated, or stopped,
@@ -97,6 +101,8 @@ This project takes a different stance:
 
 These failures are not model problems.
 They are governance problems.
+
+**Core principle:** Probabilistic systems require deterministic responsibility boundaries. Engineering systems must know when not to act.
 
 ---
 
@@ -284,14 +290,6 @@ This project is intended for engineers and architects who:
 - Are responsible for system failures, not just demos
 - Design AI systems that must stop safely
 - Treat AI as infrastructure, not as a feature
-
----
-
-## Design philosophy
-
-Probabilistic systems require deterministic responsibility boundaries.
-
-Engineering systems must know when not to act.
 
 ---
 
