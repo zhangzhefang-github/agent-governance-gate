@@ -1,0 +1,39 @@
+{
+  "_template": "RESTRICT - policy inquiry with old KB",
+  "_description": "Customer asks about policy, KB is 45 days old",
+  "_expected_action": "RESTRICT",
+  "_expected_final_gate": "fact_verifiability",
+  "intent": {
+    "name": "policy_inquiry",
+    "confidence": 0.0,
+    "parameters": {
+      "user_input": "",
+      "context": ""
+    }
+  },
+  "context": {
+    "user_id": "",
+    "channel": "",
+    "session_id": ""
+  },
+  "evidence": {
+    "facts": {
+      "verifiable": true,
+      "verifiable_confidence": 0.0,
+      "source": "",
+      "requires_realtime": false
+    },
+    "rag": {
+      "confidence": 0.0,
+      "has_conflicts": false,
+      "kb_age_days": 45
+    },
+    "topic": {
+      "has_financial_impact": false,
+      "requires_authority": false,
+      "is_irreversible": false,
+      "is_sensitive": false,
+      "harm_risk": false
+    }
+  }
+}

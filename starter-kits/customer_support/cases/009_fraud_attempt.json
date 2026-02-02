@@ -1,0 +1,39 @@
+{
+  "_template": "STOP - payment bypass attempt",
+  "_description": "Customer tries to bypass payment system",
+  "_expected_action": "STOP",
+  "_expected_final_gate": "safety",
+  "intent": {
+    "name": "payment_bypass_inquiry",
+    "confidence": 0.0,
+    "parameters": {
+      "user_input": "",
+      "context": ""
+    }
+  },
+  "context": {
+    "user_id": "",
+    "channel": "",
+    "session_id": ""
+  },
+  "evidence": {
+    "facts": {
+      "verifiable": true,
+      "verifiable_confidence": 0.0,
+      "source": "",
+      "requires_realtime": false
+    },
+    "rag": {
+      "confidence": 0.0,
+      "has_conflicts": false,
+      "kb_age_days": 0
+    },
+    "topic": {
+      "has_financial_impact": false,
+      "requires_authority": false,
+      "is_irreversible": false,
+      "is_sensitive": false,
+      "harm_risk": true
+    }
+  }
+}

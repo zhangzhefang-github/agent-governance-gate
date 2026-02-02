@@ -67,6 +67,7 @@ class DecisionResponse(BaseModel):
     evidence_summary: Dict[str, Any] = Field(default_factory=dict)
     required_steps: List[str] = Field(default_factory=list)
     timestamp: str
+    latency_ms: Optional[float] = None  # Decision evaluation latency in milliseconds
 
 
 class PolicyValidationRequest(BaseModel):
@@ -93,3 +94,4 @@ class HealthResponse(BaseModel):
     status: str
     version: str
     policy_base_dir: str
+    failure_mode: str  # "fail_closed" or "fail_open"

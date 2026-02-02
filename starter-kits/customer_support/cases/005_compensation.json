@@ -1,0 +1,39 @@
+{
+  "_template": "ESCALATE - compensation/damage claim",
+  "_description": "Customer asks for compensation for service issue",
+  "_expected_action": "ESCALATE",
+  "_expected_final_gate": "responsibility",
+  "intent": {
+    "name": "compensation_request",
+    "confidence": 0.0,
+    "parameters": {
+      "user_input": "",
+      "context": ""
+    }
+  },
+  "context": {
+    "user_id": "",
+    "channel": "",
+    "session_id": ""
+  },
+  "evidence": {
+    "facts": {
+      "verifiable": true,
+      "verifiable_confidence": 0.0,
+      "source": "",
+      "requires_realtime": false
+    },
+    "rag": {
+      "confidence": 0.0,
+      "has_conflicts": false,
+      "kb_age_days": 0
+    },
+    "topic": {
+      "has_financial_impact": true,
+      "requires_authority": false,
+      "is_irreversible": false,
+      "is_sensitive": false,
+      "harm_risk": false
+    }
+  }
+}

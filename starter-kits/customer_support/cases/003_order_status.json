@@ -1,0 +1,39 @@
+{
+  "_template": "ALLOW - simple order status query",
+  "_description": "Customer checks order status",
+  "_expected_action": "ALLOW",
+  "_expected_final_gate": null,
+  "intent": {
+    "name": "order_status_query",
+    "confidence": 0.0,
+    "parameters": {
+      "user_input": "",
+      "context": ""
+    }
+  },
+  "context": {
+    "user_id": "",
+    "channel": "",
+    "session_id": ""
+  },
+  "evidence": {
+    "facts": {
+      "verifiable": true,
+      "verifiable_confidence": 0.0,
+      "source": "",
+      "requires_realtime": true
+    },
+    "rag": {
+      "confidence": 0.0,
+      "has_conflicts": false,
+      "kb_age_days": 0
+    },
+    "topic": {
+      "has_financial_impact": false,
+      "requires_authority": false,
+      "is_irreversible": false,
+      "is_sensitive": false,
+      "harm_risk": false
+    }
+  }
+}

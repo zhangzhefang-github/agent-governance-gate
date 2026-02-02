@@ -1,0 +1,42 @@
+{
+  "_template": "Financial commitment - refund request",
+  "_description": "Customer asks for refund on recent order",
+  "_expected_action": "ESCALATE",
+  "_expected_final_gate": "responsibility",
+
+  "intent": {
+    "name": "refund_request",
+    "confidence": 0.0,  # TODO: Set actual confidence
+    "parameters": {
+      "user_input": "",  # TODO: Add actual customer message
+      "order_id": "",    # TODO: Add order ID if mentioned
+      "refund_amount": null,  # TODO: Add amount if specified
+      "reason": ""       # TODO: Add refund reason
+    }
+  },
+  "context": {
+    "user_id": "",      # TODO: Customer ID
+    "channel": "",      # TODO: web/email/chat/phone
+    "session_id": ""    # TODO: Session identifier
+  },
+  "evidence": {
+    "facts": {
+      "verifiable": true,
+      "verifiable_confidence": 0.0,  # TODO: Set based on data availability
+      "source": "",     # TODO: database/crm/third_party
+      "requires_realtime": false
+    },
+    "rag": {
+      "confidence": 0.0,  # TODO: RAG confidence score
+      "has_conflicts": false,
+      "kb_age_days": 0   # TODO: Knowledge base age
+    },
+    "topic": {
+      "has_financial_impact": true,  # Always true for refunds
+      "requires_authority": false,
+      "is_irreversible": false,
+      "is_sensitive": false,
+      "harm_risk": false
+    }
+  }
+}

@@ -5,6 +5,7 @@ Provides framework-agnostic REST endpoints for evaluating governance decisions.
 """
 
 import os
+import time
 from pathlib import Path
 from typing import Optional
 
@@ -27,6 +28,7 @@ from governance_gate.api.models import (
     HealthResponse,
     GateDecisionResponse,
 )
+from governance_gate.api.config import config
 
 # Configuration
 POLICY_BASE_DIR = os.environ.get("GOVGATE_POLICY_DIR", "./policies/presets")
@@ -86,7 +88,8 @@ async def health():
     return HealthResponse(
         status="healthy",
         version=API_VERSION,
-        policy_base_dir=str(Path(POLICY_BASE_DIR).resolve()),
+        policy_base_dir=str(Path(config.policy_base_dir).resolve()),
+        failure_mode=config.failure_mode,
     )
 
 
@@ -101,6 +104,8 @@ async def evaluate_decision(request: GovernanceRequest):
     Returns:
         Decision with action, rationale, and trace information
     """
+    start_time = time.time()
+
     try:
         # Load policy if specified
         policy_evaluator: Optional[PolicyEvaluator] = None
@@ -147,6 +152,9 @@ async def evaluate_decision(request: GovernanceRequest):
         pipeline = create_pipeline()
         decision = pipeline.evaluate(intent, context, evidence, policy_evaluator)
 
+        # Calculate latency
+        latency_ms = (time.time() - start_time) * 1000
+
         # Convert gate_decisions to response format
         gate_decisions = {}
         for gate_name, gate_decision in decision.gate_decisions.items():
@@ -173,6 +181,7 @@ async def evaluate_decision(request: GovernanceRequest):
             evidence_summary=decision.evidence_summary,
             required_steps=decision.required_steps,
             timestamp=decision.timestamp,
+            latency_ms=round(latency_ms, 2),
         )
 
     except ValidationError as e:
@@ -183,16 +192,80 @@ async def evaluate_decision(request: GovernanceRequest):
     except HTTPException:
         # Re-raise HTTPException as-is
         raise
-    except GovernanceError as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Governance error: {e}"
-        )
+    except (GovernanceError, PolicyError) as e:
+        # Internal governance errors - use failure mode
+        if config.failure_mode == "fail_closed":
+            # Conservative: ESCALATE to human
+            from governance_gate.core.decision import generate_trace_id
+
+            return DecisionResponse(
+                action="ESCALATE",
+                rationale=f"Governance unavailable (fail-closed mode): {str(e)}",
+                trace_id=generate_trace_id(),
+                policy_version=None,
+                policy_name=None,
+                decision_code=None,
+                final_gate=None,
+                gate_decisions={},
+                evidence_summary={},
+                required_steps=["Manual review required due to governance system failure"],
+                timestamp=time.time(),
+                latency_ms=None,
+            )
+        else:  # fail_open
+            # Less conservative: RESTRICT with warning
+            from governance_gate.core.decision import generate_trace_id
+
+            return DecisionResponse(
+                action="RESTRICT",
+                rationale=f"Governance unavailable (fail-open mode): {str(e)}. Response limited.",
+                trace_id=generate_trace_id(),
+                policy_version=None,
+                policy_name=None,
+                decision_code=None,
+                final_gate=None,
+                gate_decisions={},
+                evidence_summary={},
+                required_steps=["System unavailable - showing limited response"],
+                timestamp=time.time(),
+                latency_ms=None,
+            )
     except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Unexpected error: {e}"
-        )
+        # Unexpected errors - use failure mode
+        if config.failure_mode == "fail_closed":
+            from governance_gate.core.decision import generate_trace_id
+
+            return DecisionResponse(
+                action="ESCALATE",
+                rationale=f"System error (fail-closed mode): {str(e)}",
+                trace_id=generate_trace_id(),
+                policy_version=None,
+                policy_name=None,
+                decision_code=None,
+                final_gate=None,
+                gate_decisions={},
+                evidence_summary={},
+                required_steps=["Manual review required due to system failure"],
+                timestamp=time.time(),
+                latency_ms=None,
+            )
+        else:  # fail_open
+            from governance_gate.core.decision import generate_trace_id
+
+            return DecisionResponse(
+                action="RESTRICT",
+                rationale=f"System error (fail-open mode): {str(e)}. Showing limited response.",
+                trace_id=generate_trace_id(),
+                policy_version=None,
+                policy_name=None,
+                decision_code=None,
+                final_gate=None,
+                gate_decisions={},
+                evidence_summary={},
+                required_steps=["System unavailable - showing limited response"],
+                timestamp=time.time(),
+                latency_ms=None,
+            )
 
 
 @app.post("/validate_policy", response_model=PolicyValidationResponse)

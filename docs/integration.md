@@ -444,6 +444,181 @@ print(decision["gate_decisions"])
 
 ---
 
+## Observability & Monitoring
+
+### Recommended Log Schema
+
+**Structured JSON log format:**
+
+```json
+{
+  "timestamp": "2025-02-02T15:13:53Z",
+  "level": "info",
+  "event": "governance_decision",
+  "trace_id": "ff69b873-7b5a-4bc1-a18e-d0814a87cacb",
+  "service": "governance-gate",
+  "decision": {
+    "action": "STOP",
+    "final_gate": "safety",
+    "decision_code": "SAFETY_STOP_FRAUD",
+    "rationale": "Fraud request detected: 'payment system' - ..."
+  },
+  "context": {
+    "intent": "payment_bypass_inquiry",
+    "user_id": "user_999",
+    "channel": "web"
+  },
+  "telemetry": {
+    "latency_ms": 12.34,
+    "policy_version": "1.0",
+    "policy_name": "customer_support"
+  }
+}
+```
+
+**Key fields for aggregation:**
+- `decision.action` → Aggregate by decision type
+- `decision.final_gate` → Aggregate by which gate triggered
+- `decision.decision_code` → Aggregate by specific decision reason
+- `telemetry.latency_ms` → Track performance
+- `trace_id` → Correlate logs across systems
+
+### Recommended Metrics
+
+**Decision Rate (Counter):**
+```
+governance_decisions_total{action="allow"}
+governance_decisions_total{action="restrict"}
+governance_decisions_total{action="escalate"}
+governance_decisions_total{action="stop"}
+```
+
+**Final Gate Distribution (Counter):**
+```
+governance_final_gate_total{gate="safety"}
+governance_final_gate_total{gate="responsibility"}
+governance_final_gate_total{gate="fact_verifiability"}
+governance_final_gate_total{gate="uncertainty"}
+```
+
+**Decision Code Frequency (Counter):**
+```
+governance_decision_code_total{code="SAFETY_STOP_FRAUD"}
+governance_decision_code_total{code="RESPONSIBILITY_ESCALATE_FINANCIAL"}
+governance_decision_code_total{code="FACTS_RESTRICT_UNVERIFIABLE"}
+```
+
+**Latency (Histogram):**
+```
+governance_decision_latency_ms_bucket{le="1"}
+governance_decision_latency_ms_bucket{le="5"}
+governance_decision_latency_ms_bucket{le="10"}
+governance_decision_latency_ms_bucket{le="50"}
+governance_decision_latency_ms_bucket{le="100"}
+governance_decision_latency_ms_bucket{le="+Inf"}
+governance_decision_latency_ms_sum
+governance_decision_latency_ms_count
+```
+
+**Allow Rate (Gauge - % of ALLOW decisions):**
+```
+governance_allow_rate = (
+  governance_decisions_total{action="allow"}
+  / governance_decisions_total
+) * 100
+```
+
+### Example: Python Logging with structlog
+
+```python
+import structlog
+
+log = structlog.get_logger()
+
+def log_decision(decision: dict, intent: dict, context: dict):
+    """Log governance decision in structured format."""
+
+    log.info(
+        "governance_decision",
+        trace_id=decision["trace_id"],
+        decision={
+            "action": decision["action"],
+            "final_gate": decision.get("final_gate"),
+            "decision_code": decision.get("decision_code"),
+            "rationale": decision["rationale"],
+        },
+        context={
+            "intent": intent.get("name"),
+            "user_id": context.get("user_id"),
+            "channel": context.get("channel"),
+        },
+        telemetry={
+            "latency_ms": decision.get("latency_ms"),
+            "policy_version": decision.get("policy_version"),
+            "policy_name": decision.get("policy_name"),
+        }
+    )
+```
+
+### Example: Prometheus Metrics Export
+
+```python
+from prometheus_client import Counter, Histogram
+
+decision_counter = Counter(
+    'governance_decisions_total',
+    'Total governance decisions',
+    ['action', 'final_gate']
+)
+
+decision_latency = Histogram(
+    'governance_decision_latency_ms',
+    'Decision evaluation latency',
+    buckets=[1, 5, 10, 25, 50, 100, 250, 500, 1000]
+)
+
+def record_metrics(decision: dict):
+    """Record Prometheus metrics."""
+
+    decision_counter.labels(
+        action=decision["action"],
+        final_gate=decision.get("final_gate", "none")
+    ).inc()
+
+    if decision.get("latency_ms"):
+        decision_latency.observe(decision["latency_ms"])
+```
+
+### Alerting Recommendations
+
+**High STOP Rate (>5%):**
+```yaml
+alert: HighStopRate
+expr: rate(governance_decisions_total{action="stop"}[5m]) / rate(governance_decisions_total[5m]) > 0.05
+annotations:
+  summary: "Governance gate STOP rate above 5%"
+  description: "{{ $value | humanizePercentage }} of requests are blocked"
+```
+
+**High Latency (>100ms p95):**
+```yaml
+alert: HighDecisionLatency
+expr: histogram_quantile(0.95, governance_decision_latency_ms) > 100
+annotations:
+  summary: "Governance decision latency p95 above 100ms"
+```
+
+**Safety Gate Spiking (>3x baseline):**
+```yaml
+alert: SafetyGateSpike
+expr: rate(governance_final_gate_total{gate="safety"}[5m]) > 3 * rate(governance_final_gate_total{gate="safety"}[1h] offset 1h)
+annotations:
+  summary: "Safety gate blocking rate spiked 3x"
+  description: "Possible fraud attack or system abuse"
+```
+
+---
+
 ## Next Steps
 
 1. **Try a case:** `govgate eval examples/case_law/cases/011_fraud_detection/input.json`

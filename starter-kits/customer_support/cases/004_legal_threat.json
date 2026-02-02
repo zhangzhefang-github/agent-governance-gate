@@ -1,0 +1,39 @@
+{
+  "_template": "ESCALATE - legal threat mentioned",
+  "_description": "Customer mentions legal action",
+  "_expected_action": "ESCALATE",
+  "_expected_final_gate": "responsibility",
+  "intent": {
+    "name": "legal_inquiry",
+    "confidence": 0.0,
+    "parameters": {
+      "user_input": "",
+      "context": ""
+    }
+  },
+  "context": {
+    "user_id": "",
+    "channel": "",
+    "session_id": ""
+  },
+  "evidence": {
+    "facts": {
+      "verifiable": true,
+      "verifiable_confidence": 0.0,
+      "source": "",
+      "requires_realtime": false
+    },
+    "rag": {
+      "confidence": 0.0,
+      "has_conflicts": false,
+      "kb_age_days": 0
+    },
+    "topic": {
+      "has_financial_impact": false,
+      "requires_authority": false,
+      "is_irreversible": false,
+      "is_sensitive": true,
+      "harm_risk": false
+    }
+  }
+}

@@ -1,0 +1,154 @@
+# Customer Support Governance Policy
+# Starter kit for triaging customer support interactions
+
+name: customer_support_starter
+version: "1.0"
+description: |
+  Governance policy for customer support triage.
+  Focus on preventing unauthorized commitments, handling sensitive topics,
+  and escalating financial/authority decisions.
+
+# Gate configurations
+gates:
+  fact_verifiability:
+    verifiable_threshold: 0.7
+    require_realtime_facts:
+      - order_status_query
+      - refund_status_query
+      - account_balance_query
+    stop_on_unverifiable: false
+
+  uncertainty:
+    confidence_threshold: 0.75
+    stop_on_conflict: false
+    outdated_version_days: 30
+
+  responsibility:
+    # Intents that require human review due to financial impact
+    financial_intents:
+      - refund_request
+      - discount_request
+      - compensation_request
+      - chargeback_request
+      - credit_request
+
+    # Intents that require authority approval
+    authority_intents:
+      - policy_change_request
+      - exception_request
+      - account_closure_request
+      - data_deletion_request
+
+    # Intents involving sensitive topics
+    sensitive_intents:
+      - legal_threat
+      - regulatory_complaint
+      - safety_concern
+      - harassment_report
+
+    stop_on_sensitive: false  # ESCALATE instead of STOP
+
+  safety:
+    # Additional fraud keywords to monitor
+    additional_fraud_keywords: []
+    additional_illegal_keywords: []
+
+    # Whether to STOP on sensitive topics (extreme cases only)
+    stop_on_sensitive_stop: false
+
+# Rules (priority order)
+rules:
+  # Priority 10: Immediate safety blocks
+  - priority: 10
+    condition:
+      all_of:
+        - field: intent.parameters.user_input
+          operator: contains
+          value: "bypass payment"
+    action: STOP
+    rationale: "Fraud attempt detected"
+
+  # Priority 20: Financial commitments require escalation
+  - priority: 20
+    condition:
+      all_of:
+        - field: intent.name
+          operator: in
+          value: ["refund_request", "compensation_request", "credit_request"]
+        - field: evidence.topic.has_financial_impact
+          operator: equals
+          value: true
+    action: ESCALATE
+    rationale: "Financial commitment requires human review"
+
+  # Priority 30: Authority limits
+  - priority: 30
+    condition:
+      any_of:
+        - field: intent.name
+          operator: in
+          value: ["policy_change", "exception_request", "account_closure"]
+        - field: evidence.topic.requires_authority
+          operator: equals
+          value: true
+    action: ESCALATE
+    rationale: "Action requires management approval"
+
+  # Priority 40: Sensitive topics
+  - priority: 40
+    condition:
+      any_of:
+        - field: evidence.topic.is_sensitive
+          operator: equals
+          value: true
+        - field: intent.name
+          operator: in
+          value: ["legal_threat", "regulatory_complaint", "harassment_report"]
+    action: ESCALATE
+    rationale: "Sensitive topic requires specialist handling"
+
+  # Priority 50: Unverifiable facts restrict response
+  - priority: 50
+    condition:
+      all_of:
+        - field: evidence.facts.verifiable
+          operator: equals
+          value: false
+        - field: evidence.facts.requires_realtime
+          operator: equals
+          value: true
+    action: RESTRICT
+    rationale: "Response depends on real-time facts not available"
+
+  # Priority 60: Outdated knowledge restrict response
+  - priority: 60
+    condition:
+      all_of:
+        - field: evidence.rag.kb_age_days
+          operator: gt
+          value: 30
+        - field: intent.name
+          operator: in
+          value: ["policy_inquiry", "product_info"]
+    action: RESTRICT
+    rationale: "Knowledge base may be outdated"
+
+  # Priority 70: Low confidence situations
+  - priority: 70
+    condition:
+      any_of:
+        - field: intent.confidence
+          operator: lt
+          value: 0.6
+        - field: evidence.rag.confidence
+          operator: lt
+          value: 0.6
+    action: RESTRICT
+    rationale: "Low confidence in understanding or retrieval"
+
+  # Priority 100: Default allow for simple queries
+  - priority: 100
+    condition:
+      none_of: []
+    action: ALLOW
+    rationale: "Request within normal handling parameters"

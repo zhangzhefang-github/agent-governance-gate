@@ -1,0 +1,39 @@
+{
+  "_template": "RESTRICT - low confidence intent",
+  "_description": "Intent recognition confidence 0.55",
+  "_expected_action": "RESTRICT",
+  "_expected_final_gate": "uncertainty",
+  "intent": {
+    "name": "generic_inquiry",
+    "confidence": 0.55,
+    "parameters": {
+      "user_input": "",
+      "context": ""
+    }
+  },
+  "context": {
+    "user_id": "",
+    "channel": "",
+    "session_id": ""
+  },
+  "evidence": {
+    "facts": {
+      "verifiable": true,
+      "verifiable_confidence": 0.0,
+      "source": "",
+      "requires_realtime": false
+    },
+    "rag": {
+      "confidence": 0.5,
+      "has_conflicts": false,
+      "kb_age_days": 0
+    },
+    "topic": {
+      "has_financial_impact": false,
+      "requires_authority": false,
+      "is_irreversible": false,
+      "is_sensitive": false,
+      "harm_risk": false
+    }
+  }
+}

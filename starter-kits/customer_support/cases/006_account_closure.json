@@ -1,0 +1,39 @@
+{
+  "_template": "ESCALATE - account closure request",
+  "_description": "Customer wants to close/delete account",
+  "_expected_action": "ESCALATE",
+  "_expected_final_gate": "responsibility",
+  "intent": {
+    "name": "account_closure_request",
+    "confidence": 0.0,
+    "parameters": {
+      "user_input": "",
+      "context": ""
+    }
+  },
+  "context": {
+    "user_id": "",
+    "channel": "",
+    "session_id": ""
+  },
+  "evidence": {
+    "facts": {
+      "verifiable": true,
+      "verifiable_confidence": 0.0,
+      "source": "",
+      "requires_realtime": false
+    },
+    "rag": {
+      "confidence": 0.0,
+      "has_conflicts": false,
+      "kb_age_days": 0
+    },
+    "topic": {
+      "has_financial_impact": false,
+      "requires_authority": true,
+      "is_irreversible": true,
+      "is_sensitive": false,
+      "harm_risk": false
+    }
+  }
+}
