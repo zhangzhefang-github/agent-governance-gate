@@ -8,6 +8,72 @@ not on model capability, prompt design, or user experience optimization.
 
 ---
 
+## Quickstart (2 minutes)
+
+### Install
+
+```bash
+# Core library
+pip install -e .
+
+# With HTTP API
+pip install -e ".[api]"
+
+# Verify
+govgate --version
+```
+
+### Try a Case
+
+```bash
+# Run a fraud detection case (returns STOP with final_gate="safety")
+cd examples/case_law
+PYTHONPATH=../../src govgate eval cases/011_fraud_detection/input.json \
+  --policy ../../policies/presets/customer_support.yaml
+```
+
+Output:
+```json
+{
+  "action": "STOP",
+  "final_gate": "safety",
+  "rationale": "Fraud request detected: 'payment system' - Refusing to process...",
+  "trace_id": "ff69b873-7b5a-4bc1-a18e-d0814a87cacb"
+}
+```
+
+### Start HTTP API
+
+```bash
+# Start server
+govgate serve --port 8000
+
+# In another terminal, test it
+curl -X POST http://localhost:8000/decision \
+  -H "Content-Type: application/json" \
+  -d '{
+    "intent": {"name": "test", "confidence": 0.9},
+    "context": {},
+    "evidence": {}
+  }'
+```
+
+### Integration (Python)
+
+```python
+from governance_gate.core.pipeline import GovernancePipeline
+from governance_gate.gates import SafetyGate, ResponsibilityGate
+from governance_gate.core.types import Intent, Context, Evidence
+
+pipeline = GovernancePipeline(gates=[SafetyGate(), ResponsibilityGate()])
+decision = pipeline.evaluate(intent, context, evidence)
+
+print(f"Decision: {decision.action}")        # ALLOW/RESTRICT/ESCALATE/STOP
+print(f"Who blocked: {decision.final_gate}")  # "safety", "responsibility", etc.
+```
+
+---
+
 ## Why this project exists
 
 Modern Agent and RAG systems are probabilistic by nature.
@@ -224,6 +290,51 @@ This project is intended for engineers and architects who:
 Probabilistic systems require deterministic responsibility boundaries.
 
 Engineering systems must know when not to act.
+
+---
+
+## Scope & Non-goals
+
+**This project IS:**
+
+✅ Governance gate (ALLOW/RESTRICT/ESCALATE/STOP decisions)
+✅ Deterministic, auditable decision logic
+✅ Policy-driven rule evaluation (YAML)
+✅ Framework-agnostic integration layer
+✅ Reference implementation for production systems
+
+**This project is NOT:**
+
+❌ Workflow engine (use LangGraph, Temporal, etc.)
+❌ Rule engine (we use simple YAML policies, not Drools/OPA)
+❌ LLM agent framework (we integrate with any, not compete)
+❌ Tool execution (we govern BEFORE tool calls, not execute)
+❌ Database/persistence layer (audit export is optional)
+❌ Monitoring/observability platform (we provide decisions, not dashboards)
+
+**Why this distinction matters:**
+
+This project is a **governance primitive**.
+It's designed to be embedded into existing systems, not replace them.
+
+If you need:
+- Workflow orchestration → Use LangGraph/Dify/Temporal
+- Complex rule management → Build on top of our YAML policies
+- Full agent platform → Integrate our gate as a pre-execution check
+- Monitoring infrastructure → Consume our decision events
+
+**Anti-pattern (don't do this):**
+```
+❌ "Add feature X to governance gate"
+```
+Feature creep destroys clarity.
+
+**Correct pattern:**
+```
+✅ "Use governance gate to protect feature X"
+✅ "Consume governance decisions in monitoring system"
+✅ "Build policy management UI on top of YAML policies"
+```
 
 ---
 
