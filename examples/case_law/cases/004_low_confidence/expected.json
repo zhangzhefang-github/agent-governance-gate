@@ -1,0 +1,5 @@
+{
+  "action": "RESTRICT",
+  "rationale_substring": "confidence",
+  "description": "User input is ambiguous with low intent confidence (0.55) and low RAG confidence (0.5). System should RESTRICT and request clarification."
+}

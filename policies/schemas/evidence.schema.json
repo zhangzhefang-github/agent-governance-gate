@@ -1,0 +1,111 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://agent-governance-gate/schemas/evidence.schema.json",
+  "title": "Evidence",
+  "description": "Represents evidence collected for governance evaluation",
+  "type": "object",
+  "properties": {
+    "facts": {
+      "type": "object",
+      "description": "Information about fact verifiability",
+      "properties": {
+        "verifiable": {
+          "type": "boolean",
+          "description": "Whether facts are verifiable"
+        },
+        "verifiable_confidence": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0
+        },
+        "source": {
+          "type": "string"
+        },
+        "freshness": {
+          "type": "string"
+        },
+        "requires_realtime": {
+          "type": "boolean"
+        }
+      }
+    },
+    "rag": {
+      "type": "object",
+      "description": "Information about retrieval quality",
+      "properties": {
+        "confidence": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0
+        },
+        "source": {
+          "type": "string"
+        },
+        "has_conflicts": {
+          "type": "boolean"
+        },
+        "conflict_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "kb_version": {
+          "type": "string"
+        },
+        "kb_age_days": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "coverage": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0
+        },
+        "tool_disagreement": {
+          "type": "boolean"
+        }
+      }
+    },
+    "topic": {
+      "type": "object",
+      "description": "Information about the topic and its sensitivity",
+      "properties": {
+        "has_financial_impact": {
+          "type": "boolean"
+        },
+        "requires_authority": {
+          "type": "boolean"
+        },
+        "is_irreversible": {
+          "type": "boolean"
+        },
+        "is_sensitive": {
+          "type": "boolean"
+        }
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Additional evidence",
+      "additionalProperties": true
+    }
+  },
+  "examples": [
+    {
+      "facts": {
+        "verifiable": true,
+        "verifiable_confidence": 0.9,
+        "source": "database",
+        "freshness": "fresh"
+      },
+      "rag": {
+        "confidence": 0.85,
+        "source": "vector_db",
+        "has_conflicts": false
+      },
+      "topic": {
+        "has_financial_impact": false,
+        "requires_authority": false
+      }
+    }
+  ]
+}

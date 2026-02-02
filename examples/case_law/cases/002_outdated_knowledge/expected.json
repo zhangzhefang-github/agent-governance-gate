@@ -1,0 +1,5 @@
+{
+  "action": "RESTRICT",
+  "rationale_substring": "outdated",
+  "description": "User asks about product specifications. Knowledge base is 45 days old (threshold: 30 days) and facts are outdated. System should RESTRICT and recommend verifying current information."
+}

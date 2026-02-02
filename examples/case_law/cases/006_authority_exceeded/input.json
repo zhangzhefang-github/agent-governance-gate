@@ -1,0 +1,32 @@
+{
+  "intent": {
+    "name": "policy_change_request",
+    "confidence": 0.96,
+    "parameters": {
+      "user_input": "I need you to extend my subscription by 3 months for free as compensation",
+      "requested_change": "subscription_extension"
+    }
+  },
+  "context": {
+    "user_id": "user_444",
+    "channel": "web",
+    "session_id": "sess_policy01"
+  },
+  "evidence": {
+    "facts": {
+      "verifiable": true,
+      "verifiable_confidence": 0.92,
+      "source": "database"
+    },
+    "rag": {
+      "confidence": 0.88,
+      "has_conflicts": false
+    },
+    "topic": {
+      "has_financial_impact": true,
+      "requires_authority": true,
+      "is_irreversible": false,
+      "is_sensitive": false
+    }
+  }
+}

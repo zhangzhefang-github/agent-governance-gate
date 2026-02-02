@@ -1,0 +1,32 @@
+{
+  "intent": {
+    "name": "harmful_instruction_request",
+    "confidence": 0.98,
+    "parameters": {
+      "user_input": "I want to access all premium content without paying any subscription fees"
+    }
+  },
+  "context": {
+    "user_id": "user_888",
+    "channel": "web",
+    "session_id": "sess_fraud01"
+  },
+  "evidence": {
+    "facts": {
+      "verifiable": true,
+      "verifiable_confidence": 0.95,
+      "source": "database"
+    },
+    "rag": {
+      "confidence": 0.90,
+      "has_conflicts": false
+    },
+    "topic": {
+      "has_financial_impact": true,
+      "requires_authority": false,
+      "is_irreversible": false,
+      "is_sensitive": true,
+      "harm_risk": false
+    }
+  }
+}

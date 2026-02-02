@@ -1,0 +1,149 @@
+# Customer Support Governance Policy
+# This policy defines governance rules for customer support triage
+
+version: "1.0"
+name: customer_support_triage
+description: |
+  Governance policy for customer support intents.
+  Demonstrates how the same intent can lead to different decisions based on context and evidence.
+
+gates:
+  # Fact Verifiability Gate configuration
+  fact_verifiability:
+    # Intents that require real-time facts
+    require_realtime_facts:
+      - order_status_query
+      - account_balance_query
+      - shipment_tracking
+    # Minimum confidence for fact verifiability
+    verifiable_threshold: 0.7
+    # Whether to STOP (vs RESTRICT) on unverifiable facts for realtime intents
+    stop_on_unverifiable: false
+
+  # Uncertainty Gate configuration
+  uncertainty:
+    # Minimum RAG confidence threshold
+    confidence_threshold: 0.6
+    # Whether to STOP on conflicting results
+    stop_on_conflict: false
+    # Days after which KB version is considered outdated
+    outdated_version_days: 30
+
+  # Responsibility Gate configuration
+  responsibility:
+    # Intents that have financial impact
+    financial_intents:
+      - refund
+      - compensation
+      - discount_approval
+      - credit_request
+      - payment_adjustment
+    # Intents that require organizational authority
+    authority_intents:
+      - policy_change
+      - contract_modification
+      - commitment
+      - guarantee
+    # Intents that are sensitive (legal, medical, regulatory)
+    sensitive_intents:
+      - legal_advice
+      - medical_advice
+      - regulatory_compliance
+    # Whether to STOP (vs ESCALATE) on sensitive intents
+    stop_on_sensitive: false
+
+rules:
+  # Rule: Low confidence intent recognition should RESTRICT
+  - name: low_intent_confidence
+    priority: 100
+    conditions:
+      intent.confidence:
+        lt: 0.7
+    action: RESTRICT
+    reason: Intent confidence is low - request clarification
+    enabled: true
+
+  # Rule: Compensate keyword should ESCALATE regardless of intent
+  - name: compensate_keyword
+    priority: 90
+    conditions:
+      intent.parameters.user_input:
+        contains: "compensat"
+    action: ESCALATE
+    reason: Compensation request detected - requires human review
+    enabled: true
+
+  # Rule: Unverified facts with realtime dependency should RESTRICT
+  - name: unverified_realtime_facts
+    priority: 80
+    conditions:
+      evidence.facts.verifiable:
+        is_false: true
+      evidence.facts.requires_realtime:
+        is_true: true
+    action: RESTRICT
+    reason: Intent requires real-time facts but they are not verifiable
+    enabled: true
+
+  # Rule: Low RAG confidence should RESTRICT
+  - name: low_rag_confidence
+    priority: 70
+    conditions:
+      evidence.rag.confidence:
+        lt: 0.6
+    action: RESTRICT
+    reason: Retrieval confidence is below threshold
+    enabled: true
+
+  # Rule: Financial impact should ESCALATE
+  - name: financial_impact
+    priority: 60
+    conditions:
+      evidence.topic.has_financial_impact:
+        is_true: true
+    action: ESCALATE
+    reason: Request has financial responsibility - requires human review
+    enabled: true
+
+  # Rule: Conflicting retrieval results should RESTRICT
+  - name: conflicting_retrieval
+    priority: 50
+    conditions:
+      evidence.rag.has_conflicts:
+        is_true: true
+    action: RESTRICT
+    reason: Retrieval has conflicting results - cannot determine answer
+    enabled: true
+
+  # Rule: Outdated knowledge base should RESTRICT
+  - name: outdated_knowledge
+    priority: 40
+    conditions:
+      evidence.rag.kb_age_days:
+        gt: 30
+    action: RESTRICT
+    reason: Knowledge base is outdated - recommend refresh
+    enabled: true
+
+  # Rule: API channel can have higher autonomy
+  - name: api_channel_trust
+    priority: 30
+    conditions:
+      context.channel:
+        equals: "api"
+      intent.confidence:
+        gte: 0.9
+      evidence.rag.confidence:
+        gte: 0.7
+    action: ALLOW
+    reason: API channel with high confidence - safe to proceed
+    enabled: true
+
+metadata:
+  version: "1.0.0"
+  last_updated: "2025-01-01"
+  author: "Governance Team"
+  tags:
+    - customer-support
+    - triage
+    - v1

@@ -1,0 +1,35 @@
+{
+  "intent": {
+    "name": "product_availability_query",
+    "confidence": 0.91,
+    "parameters": {
+      "product_id": "PROD-999",
+      "user_input": "Is this product in stock?"
+    }
+  },
+  "context": {
+    "user_id": "user_111",
+    "channel": "api",
+    "session_id": "sess_xyz789"
+  },
+  "evidence": {
+    "facts": {
+      "verifiable": true,
+      "verifiable_confidence": 0.75,
+      "source": "multiple_sources"
+    },
+    "rag": {
+      "confidence": 0.75,
+      "source": "vector_db",
+      "has_conflicts": true,
+      "conflict_count": 3,
+      "tool_disagreement": true
+    },
+    "topic": {
+      "has_financial_impact": false,
+      "requires_authority": false,
+      "is_irreversible": false,
+      "is_sensitive": false
+    }
+  }
+}

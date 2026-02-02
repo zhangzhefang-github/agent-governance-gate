@@ -1,0 +1,34 @@
+{
+  "intent": {
+    "name": "discount_request",
+    "confidence": 0.93,
+    "parameters": {
+      "user_input": "I've been a loyal customer for 5 years, give me a 20% discount on my order",
+      "order_amount": 500.00
+    }
+  },
+  "context": {
+    "user_id": "user_333",
+    "channel": "web",
+    "session_id": "sess_discount01"
+  },
+  "evidence": {
+    "facts": {
+      "verifiable": true,
+      "verifiable_confidence": 0.95,
+      "source": "database",
+      "freshness": "fresh"
+    },
+    "rag": {
+      "confidence": 0.90,
+      "source": "vector_db",
+      "has_conflicts": false
+    },
+    "topic": {
+      "has_financial_impact": true,
+      "requires_authority": true,
+      "is_irreversible": false,
+      "is_sensitive": false
+    }
+  }
+}

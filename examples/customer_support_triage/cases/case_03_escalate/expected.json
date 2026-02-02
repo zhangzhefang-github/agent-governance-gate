@@ -1,0 +1,5 @@
+{
+  "action": "ESCALATE",
+  "rationale_substring": "financial",
+  "description": "User demands compensation - the ResponsibilityGate detects financial responsibility (has_financial_impact: true) and should ESCALATE for human review. The compensate keyword in user_input should also trigger policy rule 'compensate_keyword'."
+}

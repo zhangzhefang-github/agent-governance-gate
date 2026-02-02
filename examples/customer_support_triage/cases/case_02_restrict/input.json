@@ -1,0 +1,38 @@
+{
+  "intent": {
+    "name": "order_status_query",
+    "confidence": 0.92,
+    "parameters": {
+      "order_id": "12345",
+      "user_input": "Why has my order not shipped yet?"
+    }
+  },
+  "context": {
+    "user_id": "user_123",
+    "channel": "web",
+    "session_id": "session_456"
+  },
+  "evidence": {
+    "facts": {
+      "verifiable": false,
+      "verifiable_confidence": 0.4,
+      "source": "unknown",
+      "freshness": "stale",
+      "requires_realtime": true
+    },
+    "rag": {
+      "confidence": 0.85,
+      "source": "vector_db",
+      "has_conflicts": false,
+      "conflict_count": 0,
+      "kb_version": "1.2.3",
+      "kb_age_days": 5
+    },
+    "topic": {
+      "has_financial_impact": false,
+      "requires_authority": false,
+      "is_irreversible": false,
+      "is_sensitive": false
+    }
+  }
+}

@@ -1,0 +1,5 @@
+{
+  "action": "RESTRICT",
+  "rationale_substring": "real-time facts",
+  "description": "User asks why order hasn't shipped - this requires real-time shipping information that is not verifiable (unknown source, stale freshness). The FactVerifiabilityGate should trigger RESTRICT because the intent requires real-time facts but facts are not verifiable."
+}

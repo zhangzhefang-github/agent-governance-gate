@@ -1,0 +1,5 @@
+{
+  "action": "ESCALATE",
+  "rationale_substring": "financial",
+  "description": "User asks about legal action involving damages (financial compensation). This involves both legal sensitivity and financial impact. System should ESCALATE to legal department or human agents."
+}

@@ -1,0 +1,40 @@
+{
+  "intent": {
+    "name": "order_status_query",
+    "confidence": 0.95,
+    "parameters": {
+      "order_id": "12345",
+      "user_input": "How do I check my order status?"
+    }
+  },
+  "context": {
+    "user_id": "user_123",
+    "channel": "web",
+    "session_id": "session_456"
+  },
+  "evidence": {
+    "facts": {
+      "verifiable": true,
+      "verifiable_confidence": 0.9,
+      "source": "database",
+      "freshness": "fresh",
+      "requires_realtime": false
+    },
+    "rag": {
+      "confidence": 0.85,
+      "source": "vector_db",
+      "has_conflicts": false,
+      "conflict_count": 0,
+      "kb_version": "1.2.3",
+      "kb_age_days": 5,
+      "coverage": 0.95,
+      "tool_disagreement": false
+    },
+    "topic": {
+      "has_financial_impact": false,
+      "requires_authority": false,
+      "is_irreversible": false,
+      "is_sensitive": false
+    }
+  }
+}

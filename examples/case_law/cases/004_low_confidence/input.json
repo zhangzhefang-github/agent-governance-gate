@@ -1,0 +1,33 @@
+{
+  "intent": {
+    "name": "ambiguous_request",
+    "confidence": 0.55,
+    "parameters": {
+      "user_input": "I need help with that thing I ordered before"
+    }
+  },
+  "context": {
+    "user_id": "user_222",
+    "channel": "web",
+    "session_id": "sess_lowconf001"
+  },
+  "evidence": {
+    "facts": {
+      "verifiable": true,
+      "verifiable_confidence": 0.7,
+      "source": "database"
+    },
+    "rag": {
+      "confidence": 0.5,
+      "source": "vector_db",
+      "has_conflicts": false,
+      "coverage": 0.6
+    },
+    "topic": {
+      "has_financial_impact": false,
+      "requires_authority": false,
+      "is_irreversible": false,
+      "is_sensitive": false
+    }
+  }
+}

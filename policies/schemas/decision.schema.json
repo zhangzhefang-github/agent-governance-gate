@@ -1,0 +1,85 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://agent-governance-gate/schemas/decision.schema.json",
+  "title": "Decision",
+  "description": "Represents a governance decision from the pipeline",
+  "type": "object",
+  "required": ["action", "rationale", "trace_id"],
+  "properties": {
+    "action": {
+      "type": "string",
+      "enum": ["ALLOW", "RESTRICT", "ESCALATE", "STOP"],
+      "description": "The decision action"
+    },
+    "rationale": {
+      "type": "string",
+      "description": "Human-readable explanation of the decision"
+    },
+    "trace_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Unique identifier for tracing and audit"
+    },
+    "evidence_summary": {
+      "type": "object",
+      "description": "Structured summary of evidence considered",
+      "properties": {
+        "intent": {
+          "type": "string"
+        },
+        "context": {
+          "type": "object",
+          "properties": {
+            "channel": {
+              "type": ["string", "null"]
+            },
+            "user_id": {
+              "type": ["string", "null"]
+            }
+          }
+        },
+        "evidence_keys": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "required_steps": {
+      "type": "array",
+      "description": "Optional list of required next steps",
+      "items": {
+        "type": "string"
+      }
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the decision was made"
+    },
+    "gate_contributions": {
+      "type": "object",
+      "description": "Which gates contributed to this decision",
+      "additionalProperties": {
+        "type": "string"
+      }
+    }
+  },
+  "examples": [
+    {
+      "action": "ALLOW",
+      "rationale": "All gates passed - safe to proceed",
+      "trace_id": "550e8400-e29b-41d4-a716-446655440000",
+      "evidence_summary": {
+        "intent": "order_status_query"
+      },
+      "required_steps": [],
+      "gate_contributions": {
+        "fact_verifiability": "Facts are verifiable",
+        "uncertainty": "Uncertainty is acceptable",
+        "responsibility": "Within responsibility boundaries"
+      }
+    }
+  ]
+}

@@ -1,0 +1,5 @@
+{
+  "action": "ESCALATE",
+  "rationale_substring": "financial",
+  "description": "User requests policy change (free subscription extension) which requires organizational authority beyond agent's scope. The presence of 'free' and 'extension' suggests financial impact. System should ESCALATE for management approval."
+}

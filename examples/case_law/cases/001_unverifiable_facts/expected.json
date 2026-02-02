@@ -1,0 +1,5 @@
+{
+  "action": "RESTRICT",
+  "rationale_substring": "real-time facts",
+  "description": "User asks for account balance which requires real-time facts, but facts are not verifiable (unknown source, stale freshness). The governance system should RESTRICT because it cannot provide accurate real-time information."
+}

@@ -1,0 +1,5 @@
+{
+  "action": "ESCALATE",
+  "rationale_substring": "irreversible",
+  "description": "User requests account closure which is irreversible. Even with high confidence, the system should ESCALATE for explicit confirmation and human review due to the permanent nature of the action."
+}

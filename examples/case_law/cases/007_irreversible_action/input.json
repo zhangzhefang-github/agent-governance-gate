@@ -1,0 +1,32 @@
+{
+  "intent": {
+    "name": "account_closure",
+    "confidence": 0.97,
+    "parameters": {
+      "user_input": "Close my account immediately and delete all my data",
+      "account_id": "ACC-99999"
+    }
+  },
+  "context": {
+    "user_id": "user_555",
+    "channel": "web",
+    "session_id": "sess_closure01"
+  },
+  "evidence": {
+    "facts": {
+      "verifiable": true,
+      "verifiable_confidence": 0.95,
+      "source": "database"
+    },
+    "rag": {
+      "confidence": 0.92,
+      "has_conflicts": false
+    },
+    "topic": {
+      "has_financial_impact": false,
+      "requires_authority": false,
+      "is_irreversible": true,
+      "is_sensitive": false
+    }
+  }
+}

@@ -1,0 +1,5 @@
+{
+  "action": "RESTRICT",
+  "rationale_substring": "conflict",
+  "description": "Product availability query has 3 conflicting retrieval results. Multiple sources disagree on stock status. System should RESTRICT and indicate conflicting information."
+}

@@ -1,0 +1,5 @@
+{
+  "action": "ESCALATE",
+  "rationale_substring": "financial",
+  "description": "User requests discount which represents a financial commitment. The agent cannot autonomously approve discounts that affect revenue. System should ESCALATE for human review."
+}

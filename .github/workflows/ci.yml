@@ -1,0 +1,95 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.11", "3.12"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      - name: Run tests
+        run: |
+          pytest -v --tb=short --cov=governance_gate --cov-report=term-missing
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v4
+        if: matrix.python-version == '3.12'
+        with:
+          files: ./coverage.xml
+          flags: unittests
+          name: codecov-umbrella
+
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      - name: Check type stubs
+        run: |
+          python -m py_compile src/governance_gate/**/*.py
+
+  validate-examples:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .
+
+      - name: Validate policy
+        run: |
+          govgate validate policies/presets/customer_support.yaml
+
+      - name: Test case 01 (ALLOW)
+        run: |
+          govgate eval examples/customer_support_triage/cases/case_01_allow/input.json \
+            --policy policies/presets/customer_support.yaml | grep -q '"action": "ALLOW"'
+
+      - name: Test case 02 (RESTRICT)
+        run: |
+          govgate eval examples/customer_support_triage/cases/case_02_restrict/input.json \
+            --policy policies/presets/customer_support.yaml | grep -q '"action": "RESTRICT"'
+
+      - name: Test case 03 (ESCALATE)
+        run: |
+          govgate eval examples/customer_support_triage/cases/case_03_escalate/input.json \
+            --policy policies/presets/customer_support.yaml | grep -q '"action": "ESCALATE"'

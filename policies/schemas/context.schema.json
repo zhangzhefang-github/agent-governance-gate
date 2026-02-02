@@ -1,0 +1,128 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://agent-governance-gate/schemas/context.schema.json",
+  "title": "Context",
+  "description": "Represents execution context for the intent",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": ["string", "null"],
+      "description": "Identifier for the user"
+    },
+    "channel": {
+      "type": ["string", "null"],
+      "description": "Communication channel (e.g., 'web', 'api', 'slack')"
+    },
+    "session_id": {
+      "type": ["string", "null"],
+      "description": "Session identifier"
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Additional context information",
+      "additionalProperties": true
+    },
+    "facts": {
+      "type": "object",
+      "description": "Fact verifiability information",
+      "properties": {
+        "verifiable": {
+          "type": "boolean",
+          "description": "Whether facts are verifiable"
+        },
+        "verifiable_confidence": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "description": "Confidence in fact verifiability"
+        },
+        "source": {
+          "type": "string",
+          "description": "Source of facts (e.g., 'database', 'user_provided')"
+        },
+        "freshness": {
+          "type": "string",
+          "enum": ["fresh", "stale", "outdated", "unknown"],
+          "description": "Freshness of facts"
+        },
+        "requires_realtime": {
+          "type": "boolean",
+          "description": "Whether intent requires real-time facts"
+        }
+      }
+    },
+    "rag": {
+      "type": "object",
+      "description": "Retrieval-augmented generation information",
+      "properties": {
+        "confidence": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "description": "RAG retrieval confidence"
+        },
+        "source": {
+          "type": "string",
+          "description": "RAG source (e.g., 'vector_db')"
+        },
+        "has_conflicts": {
+          "type": "boolean",
+          "description": "Whether retrieval has conflicting results"
+        },
+        "conflict_count": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of conflicting results"
+        },
+        "kb_version": {
+          "type": "string",
+          "description": "Knowledge base version"
+        },
+        "kb_age_days": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Age of knowledge base in days"
+        },
+        "coverage": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "description": "Retrieval coverage"
+        },
+        "tool_disagreement": {
+          "type": "boolean",
+          "description": "Whether tools have conflicting results"
+        }
+      }
+    },
+    "topic": {
+      "type": "object",
+      "description": "Topic sensitivity information",
+      "properties": {
+        "has_financial_impact": {
+          "type": "boolean",
+          "description": "Whether topic has financial impact"
+        },
+        "requires_authority": {
+          "type": "boolean",
+          "description": "Whether topic requires organizational authority"
+        },
+        "is_irreversible": {
+          "type": "boolean",
+          "description": "Whether action is irreversible"
+        },
+        "is_sensitive": {
+          "type": "boolean",
+          "description": "Whether topic is sensitive (legal, medical, etc.)"
+        }
+      }
+    }
+  },
+  "examples": [
+    {
+      "user_id": "user_123",
+      "channel": "web",
+      "session_id": "session_456"
+    }
+  ]
+}

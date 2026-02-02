@@ -1,0 +1,5 @@
+{
+  "action": "ALLOW",
+  "rationale_substring": "safe to proceed",
+  "description": "User asks how to check order status - this is a simple informational request that doesn't require real-time facts, has good retrieval confidence, and has no financial impact. The system should ALLOW this to proceed."
+}

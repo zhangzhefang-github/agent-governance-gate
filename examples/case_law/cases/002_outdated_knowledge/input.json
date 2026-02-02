@@ -1,0 +1,35 @@
+{
+  "intent": {
+    "name": "product_info_inquiry",
+    "confidence": 0.94,
+    "parameters": {
+      "user_input": "What are the specifications for this product?"
+    }
+  },
+  "context": {
+    "user_id": "user_456",
+    "channel": "web",
+    "session_id": "sess_def456"
+  },
+  "evidence": {
+    "facts": {
+      "verifiable": true,
+      "verifiable_confidence": 0.85,
+      "source": "database",
+      "freshness": "outdated"
+    },
+    "rag": {
+      "confidence": 0.82,
+      "source": "vector_db",
+      "has_conflicts": false,
+      "kb_version": "1.0.0",
+      "kb_age_days": 45
+    },
+    "topic": {
+      "has_financial_impact": false,
+      "requires_authority": false,
+      "is_irreversible": false,
+      "is_sensitive": false
+    }
+  }
+}
